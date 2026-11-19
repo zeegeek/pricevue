@@ -63,8 +63,8 @@ export interface StoreAdapter {
 }
 
 export class AdapterNotConfiguredError extends Error {
-  constructor(store: StoreId, missing: string[]) {
-    super(`${store} adapter is not configured (missing: ${missing.join(", ")})`);
+  constructor(store: StoreId, missing: string[], label = `${store} adapter`) {
+    super(`${label} not configured (missing: ${missing.join(", ")})`);
     this.name = "AdapterNotConfiguredError";
   }
 }

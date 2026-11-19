@@ -1,0 +1,49 @@
+{
+  "itemsResult": {
+    "items": [
+      {
+        "asin": "B0CHX1W1XY",
+        "detailPageURL": "https://www.amazon.in/dp/B0CHX1W1XY?tag=pricevue-21&linkCode=ogi&th=1&psc=1",
+        "images": {
+          "primary": {
+            "large": {
+              "height": 500,
+              "url": "https://m.media-amazon.com/images/I/71d7rfSl0wL._SL500_.jpg",
+              "width": 500
+            },
+            "medium": null,
+            "small": null
+          }
+        },
+        "itemInfo": {
+          "byLineInfo": {
+            "brand": { "displayValue": "Apple", "label": "Brand", "locale": "en_IN" }
+          },
+          "title": {
+            "displayValue": "Apple iPhone 15 (128 GB) - Black",
+            "label": "Title",
+            "locale": "en_IN"
+          }
+        },
+        "offersV2": {
+          "listings": [
+            {
+              "availability": { "maxOrderQuantity": 2, "minOrderQuantity": 1, "type": "IN_STOCK" },
+              "condition": { "value": "New" },
+              "isBuyBoxWinner": true,
+              "merchantInfo": { "name": "Appario Retail Private Ltd" },
+              "price": {
+                "money": { "amount": 61999, "currency": "INR", "displayAmount": "₹61,999.00" },
+                "savingBasis": {
+                  "money": { "amount": 69900, "currency": "INR", "displayAmount": "₹69,900.00" },
+                  "savingBasisType": "LIST_PRICE"
+                },
+                "savings": { "money": { "amount": 7901, "currency": "INR" }, "percentage": 11 }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

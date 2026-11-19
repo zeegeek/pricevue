@@ -1,0 +1,33 @@
+{
+  "itemsResult": {
+    "items": [
+      {
+        "asin": "B0D1XD1ZV3",
+        "detailPageURL": "https://www.amazon.in/dp/B0D1XD1ZV3?tag=pricevue-21&linkCode=ogi",
+        "images": {
+          "primary": {
+            "large": null,
+            "medium": { "url": "https://m.media-amazon.com/images/I/61abc._SL160_.jpg" }
+          }
+        },
+        "itemInfo": { "title": { "displayValue": "OnePlus Nord CE4 (8GB RAM, 128GB)" } },
+        "offersV2": {
+          "listings": [
+            {
+              "availability": { "type": "OUT_OF_STOCK" },
+              "isBuyBoxWinner": false,
+              "merchantInfo": { "name": "Cloudtail" },
+              "price": { "money": { "amount": 24999, "currency": "INR" } }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "errors": [
+    {
+      "code": "ItemNotAccessible",
+      "message": "The ItemId B0000000XX is not accessible through the Creators API."
+    }
+  ]
+}

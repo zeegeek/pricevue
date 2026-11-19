@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { FlipkartAdapter, createAdapterRegistry, type StoreAdapter } from "@pricevue/core";
+import {
+  AmazonAdapter,
+  FlipkartAdapter,
+  amazonConfigFromEnv,
+  createAdapterRegistry,
+  type StoreAdapter,
+} from "@pricevue/core";
 import { processRefresh } from "./refresh";
 
 const job = {
@@ -14,7 +20,10 @@ describe("processRefresh", () => {
   it("skips unconfigured adapters instead of failing", async () => {
     const sink = { saveOffer: vi.fn() };
     const result = await processRefresh(job, createAdapterRegistry({}), sink);
-    expect(result.status).toBe("skipped");
+    expect(result).toEqual({
+      status: "skipped",
+      reason: expect.stringMatching(/^Amazon API not configured/),
+    });
     expect(sink.saveOffer).not.toHaveBeenCalled();
   });
 
@@ -55,6 +64,29 @@ describe("processRefresh", () => {
     expect(sink.saveOffer).toHaveBeenCalledWith(
       7,
       expect.objectContaining({ listedPaise: 6199900, mrpPaise: 6990000 }),
+    );
+  });
+
+  it("writes an Amazon snapshot from a Creators API response", async () => {
+    const body = readFileSync(
+      new URL("../../../packages/core/src/__fixtures__/amazon-getitems.json", import.meta.url),
+      "utf8",
+    );
+    const adapter = new AmazonAdapter(
+      amazonConfigFromEnv({
+        AMAZON_CREATORS_API_CREDENTIAL_ID: "id",
+        AMAZON_CREATORS_API_CREDENTIAL_SECRET: "s",
+      }),
+      async (url) =>
+        url.includes("/auth/o2/token")
+          ? Response.json({ access_token: "t", expires_in: 3600 })
+          : new Response(body),
+    );
+    const sink = { saveOffer: vi.fn() };
+    expect((await processRefresh(job, { amazon: adapter }, sink)).status).toBe("updated");
+    expect(sink.saveOffer).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ listedPaise: 6199900, mrpPaise: 6990000, source: "api" }),
     );
   });
 });
