@@ -46,6 +46,11 @@ export interface OfferSnapshot {
   source: "api" | "scraper" | "fixture";
 }
 
+export interface FetchHints {
+  /** Known product URL (e.g. the stored listing URL), used to fetch the canonical page. */
+  url?: string;
+}
+
 export interface StoreAdapter {
   readonly id: StoreId;
   readonly capabilities: AdapterCapabilities;
@@ -53,8 +58,8 @@ export interface StoreAdapter {
   isConfigured(): boolean;
   parseUrl(url: string): ParsedProductUrl;
   search(query: string, opts?: { limit?: number }): Promise<SearchResult[]>;
-  getListing(externalId: string): Promise<ListingDetails | null>;
-  getOffer(externalId: string): Promise<OfferSnapshot | null>;
+  getListing(externalId: string, opts?: FetchHints): Promise<ListingDetails | null>;
+  getOffer(externalId: string, opts?: FetchHints): Promise<OfferSnapshot | null>;
 }
 
 export class AdapterNotConfiguredError extends Error {

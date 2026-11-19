@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, ilike, inArray, ne, or, sql } from "drizzle-orm";
-import type { StoreId } from "@pricevue/core";
+import type { OfferSnapshot, StoreId } from "@pricevue/core";
 import type { Db } from "./client";
 import { brands, deals, offers, pricePoints, products, storeListings, variants } from "./schema";
 
@@ -137,7 +137,11 @@ export async function getProductPage(db: Db, slug: string, variantId?: number) {
     .where(eq(variants.productId, product.id))
     .orderBy(asc(variants.storageGb), asc(variants.id));
   const listingRows = await db
-    .select({ id: storeListings.id, variantId: storeListings.variantId, storeId: storeListings.storeId })
+    .select({
+      id: storeListings.id,
+      variantId: storeListings.variantId,
+      storeId: storeListings.storeId,
+    })
     .from(storeListings)
     .where(
       inArray(
@@ -176,7 +180,11 @@ export async function getProductPage(db: Db, slug: string, variantId?: number) {
 
   const historyRows = offerRows.length
     ? await db
-        .select({ listingId: pricePoints.listingId, at: pricePoints.capturedAt, pricePaise: pricePoints.pricePaise })
+        .select({
+          listingId: pricePoints.listingId,
+          at: pricePoints.capturedAt,
+          pricePaise: pricePoints.pricePaise,
+        })
         .from(pricePoints)
         .where(
           inArray(
@@ -218,4 +226,38 @@ export async function recentPricePoints(db: Db, listingId: number, since: Date) 
     .from(pricePoints)
     .where(and(eq(pricePoints.listingId, listingId), gte(pricePoints.capturedAt, since)))
     .orderBy(asc(pricePoints.capturedAt));
+}
+
+/** Marks the listing's previous offer stale, writes the new current offer and a price-history point. */
+export async function saveOfferSnapshot(db: Db, listingId: number, offer: OfferSnapshot) {
+  await db.transaction(async (tx) => {
+    await tx
+      .update(offers)
+      .set({ isCurrent: false })
+      .where(and(eq(offers.listingId, listingId), eq(offers.isCurrent, true)));
+    await tx.insert(offers).values({
+      listingId,
+      seller: offer.seller,
+      listedPaise: offer.listedPaise,
+      shippingPaise: offer.shippingPaise,
+      mrpPaise: offer.mrpPaise,
+      inStock: offer.inStock,
+      capturedAt: offer.capturedAt,
+    });
+    await tx.insert(pricePoints).values({
+      listingId,
+      capturedAt: offer.capturedAt,
+      pricePaise: offer.listedPaise,
+      inStock: offer.inStock,
+    });
+    await tx.update(storeListings).set({ lastCheckedAt: offer.capturedAt }).where(eq(storeListings.id, listingId));
+  });
+}
+
+export async function findListingId(db: Db, storeId: StoreId, externalId: string) {
+  const [row] = await db
+    .select({ id: storeListings.id })
+    .from(storeListings)
+    .where(and(eq(storeListings.storeId, storeId), eq(storeListings.externalId, externalId)));
+  return row?.id ?? null;
 }

@@ -34,6 +34,16 @@ describe("parseFlipkartProductHtml (fixtures, no live scraping)", () => {
     });
   });
 
+  it("falls back to embedded __INITIAL_STATE__ for price and MRP", () => {
+    expect(parseFlipkartProductHtml(fixture("flipkart-embedded-state.html"))).toEqual({
+      title: "Samsung Galaxy S24 FE (Mint, 128 GB) (8 GB RAM)",
+      imageUrl: "https://rukminim2.flixcart.com/image/s24fe.jpeg",
+      pricePaise: 3599900,
+      mrpPaise: 5999900,
+      inStock: true,
+    });
+  });
+
   it("returns null when no product data exists", () => {
     expect(parseFlipkartProductHtml("<html><body>captcha</body></html>")).toBeNull();
   });
@@ -52,8 +62,19 @@ describe("FlipkartAdapter", () => {
   it("builds an offer from a (mocked) page fetch", async () => {
     const fetcher = vi.fn(async () => new Response(fixture("flipkart-product.html")));
     const adapter = new FlipkartAdapter({ scraperEnabled: true }, fetcher);
-    const offer = await adapter.getOffer("MOBGTAGPTB3VS24W");
-    expect(offer).toMatchObject({ store: "flipkart", listedPaise: 6199900, inStock: true, source: "scraper" });
+    const offer = await adapter.getOffer("MOBGTAGPTB3VS24W", {
+      url: "https://www.flipkart.com/apple-iphone-15/p/itm6ac6485515ae4?pid=MOBGTAGPTB3VS24W&lid=x",
+    });
+    expect(offer).toMatchObject({
+      store: "flipkart",
+      listedPaise: 6199900,
+      inStock: true,
+      source: "scraper",
+    });
+    expect(fetcher).toHaveBeenCalledWith(
+      "https://www.flipkart.com/apple-iphone-15/p/itm6ac6485515ae4?pid=MOBGTAGPTB3VS24W",
+      expect.anything(),
+    );
   });
 });
 
@@ -67,7 +88,10 @@ describe("AmazonAdapter (Creators API stub)", () => {
 
   it("is configured when both credentials are present", () => {
     const adapter = new AmazonAdapter(
-      amazonConfigFromEnv({ AMAZON_CREATORS_API_CREDENTIAL_ID: "id", AMAZON_CREATORS_API_CREDENTIAL_SECRET: "s" }),
+      amazonConfigFromEnv({
+        AMAZON_CREATORS_API_CREDENTIAL_ID: "id",
+        AMAZON_CREATORS_API_CREDENTIAL_SECRET: "s",
+      }),
     );
     expect(adapter.isConfigured()).toBe(true);
   });

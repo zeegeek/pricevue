@@ -1,6 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createPgliteDb, runMigrations } from "../client";
-import { findByListing, getDeals, getProductPage, searchProducts } from "../queries";
+import {
+  findByListing,
+  findListingId,
+  getDeals,
+  getProductPage,
+  recentPricePoints,
+  saveOfferSnapshot,
+  searchProducts,
+} from "../queries";
 import { seedDatabase } from "../seed/seed";
 
 let handle: Awaited<ReturnType<typeof createPgliteDb>>;
@@ -30,11 +38,38 @@ describe("db seed + queries", () => {
   it("finds a product from a store listing id and returns deals", async () => {
     const page = await getProductPage(handle.db, "oneplus-13r");
     const listing = page!.offers[0]!;
-    const externalId = listing.url.match(/dp\/(\w+)|pid=(\w+)/)!.slice(1).find(Boolean)!;
+    const externalId = listing.url
+      .match(/dp\/(\w+)|pid=(\w+)/)!
+      .slice(1)
+      .find(Boolean)!;
     expect(await findByListing(handle.db, listing.storeId, externalId)).toEqual({
       slug: "oneplus-13r",
       variantId: page!.selected.id,
     });
     expect((await getDeals(handle.db)).length).toBeGreaterThan(0);
+  });
+
+  it("saves a refresh snapshot as the current offer plus a price point", async () => {
+    const before = await getProductPage(handle.db, "apple-iphone-15");
+    const externalId = new URL(before!.offers.find((o) => o.storeId === "flipkart")!.url).searchParams.get("pid")!;
+    const listingId = (await findListingId(handle.db, "flipkart", externalId))!;
+    expect(listingId).toBeTypeOf("number");
+    const capturedAt = new Date("2026-11-20T00:00:00Z");
+    await saveOfferSnapshot(handle.db, listingId, {
+      store: "flipkart",
+      externalId,
+      listedPaise: 5_899_900,
+      shippingPaise: 0,
+      mrpPaise: 6_990_000,
+      inStock: true,
+      capturedAt,
+      source: "scraper",
+    });
+    const page = await getProductPage(handle.db, "apple-iphone-15");
+    expect(page?.offers.find((o) => o.storeId === "flipkart")).toMatchObject({
+      listedPaise: 5_899_900,
+    });
+    const points = await recentPricePoints(handle.db, listingId, capturedAt);
+    expect(points.at(-1)).toMatchObject({ pricePaise: 5_899_900 });
   });
 });

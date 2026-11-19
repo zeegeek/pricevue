@@ -1,42 +1,17 @@
 import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
-import { createAdapterRegistry } from "@pricevue/core";
-import { getDb, schema } from "@pricevue/db";
-import { and, eq } from "drizzle-orm";
+import { createAdapterRegistry, type OfferSnapshot } from "@pricevue/core";
+import { getDb, saveOfferSnapshot, schema } from "@pricevue/db";
 import { processRefresh, REFRESH_QUEUE, type RefreshJob } from "./refresh";
 
-const connection = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", { maxRetriesPerRequest: null });
+const connection = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
+  maxRetriesPerRequest: null,
+});
 const adapters = createAdapterRegistry(process.env);
 const db = await getDb();
 
 const sink = {
-  async saveOffer(listingId: number, offer: Parameters<Parameters<typeof processRefresh>[2]["saveOffer"]>[1]) {
-    await db.transaction(async (tx) => {
-      await tx
-        .update(schema.offers)
-        .set({ isCurrent: false })
-        .where(and(eq(schema.offers.listingId, listingId), eq(schema.offers.isCurrent, true)));
-      await tx.insert(schema.offers).values({
-        listingId,
-        seller: offer.seller,
-        listedPaise: offer.listedPaise,
-        shippingPaise: offer.shippingPaise,
-        mrpPaise: offer.mrpPaise,
-        inStock: offer.inStock,
-        capturedAt: offer.capturedAt,
-      });
-      await tx.insert(schema.pricePoints).values({
-        listingId,
-        capturedAt: offer.capturedAt,
-        pricePaise: offer.listedPaise,
-        inStock: offer.inStock,
-      });
-      await tx
-        .update(schema.storeListings)
-        .set({ lastCheckedAt: offer.capturedAt })
-        .where(eq(schema.storeListings.id, listingId));
-    });
-  },
+  saveOffer: (listingId: number, offer: OfferSnapshot) => saveOfferSnapshot(db, listingId, offer),
 };
 
 const worker = new Worker<RefreshJob>(REFRESH_QUEUE, (job) => processRefresh(job.data, adapters, sink), {

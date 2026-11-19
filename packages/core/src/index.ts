@@ -6,3 +6,4 @@ export * from "./matcher";
 export * from "./affiliate";
 export * from "./url";
 export * from "./adapters";
+export * from "./http/polite-fetch";

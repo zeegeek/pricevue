@@ -46,7 +46,7 @@ pnpm db:setup
 
 - Store adapters implement `parseUrl`, `search`, `getListing` and `getOffer`, and declare capability flags (`packages/core/src/adapters`). New stores (Myntra, Ajio, Croma) plug into the same interface.
 - **Amazon:** uses the Creators API through a stub until credentials are set (`AMAZON_CREATORS_API_*`). Every outbound Amazon link carries `tag=pricevue-21`, via `/go/[listingId]` → `buildAffiliateUrl`.
-- **Flipkart:** an adapter stub with a scraper fallback, off by default (`FLIPKART_SCRAPER_ENABLED`). Tests use HTML fixtures only and never scrape live.
+- **Flipkart:** polite page fetcher (real UA, per-host rate limit, retry with backoff, robots.txt) parsing JSON-LD with an embedded-state fallback; off by default for the worker (`FLIPKART_SCRAPER_ENABLED`). Ingest one URL with `pnpm --filter @pricevue/worker ingest <url> [--dry-run]`. Tests use HTML fixtures only and never scrape live.
 - **Matching:** variant-aware. Brand, storage, RAM or colour conflicts are never merged, and only matches scoring ≥ 0.9 are treated as the same product.
 
 > As an Amazon Associate PriceVue earns from qualifying purchases.
