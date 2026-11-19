@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en-IN" class="scroll-smooth">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PricePulse — Track price history & compare Amazon, Flipkart, Myntra</title>
+<meta name="description" content="Compare live prices across Amazon.in, Flipkart, Myntra, Ajio and Croma. See full price history and get alerts when prices drop." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+<script>
+  // Apply theme before paint to avoid flash
+  (function(){try{var t=localStorage.getItem('pp-theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');}catch(e){}})();
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: {
+    colors: {
+      brand: {50:'#F5F3FF',100:'#EDE9FE',400:'#A78BFA',500:'#8B5CF6',600:'#7C3AED',700:'#6D28D9'},
+      ink: {DEFAULT:'#0F0F1E', soft:'#5A5A6B'},
+      night: {DEFAULT:'#0A0A14', card:'#11111E', muted:'#1C1C2B', border:'#262637'},
+      store: {amazon:'#232F3E', amazonMark:'#FF9900', flipkart:'#2874F0', myntra:'#C81E5A', ajio:'#2C4152', croma:'#0F7D7E'}
+    },
+    fontFamily: { display:['"Plus Jakarta Sans"','Inter','system-ui','sans-serif'], sans:['Inter','system-ui','sans-serif'] },
+    boxShadow: {
+      soft:'0 1px 2px rgba(16,16,40,.04), 0 4px 16px rgba(16,16,40,.06)',
+      lift:'0 10px 30px -10px rgba(76,29,149,.25)',
+      glow:'0 0 0 1px rgba(124,58,237,.15), 0 20px 60px -15px rgba(124,58,237,.45)'
+    },
+    transitionTimingFunction: { 'out-expo':'cubic-bezier(.16,1,.3,1)', spring:'cubic-bezier(.34,1.56,.64,1)' },
+    keyframes: {
+      'fade-up': { from:{opacity:0,transform:'translateY(12px)'}, to:{opacity:1,transform:'none'} },
+      marquee: { to:{transform:'translateX(-50%)'} },
+      float: { '0%,100%':{transform:'translateY(0)'}, '50%':{transform:'translateY(-8px)'} }
+    },
+    animation: { 'fade-up':'fade-up .7s cubic-bezier(.16,1,.3,1) both', marquee:'marquee 40s linear infinite', float:'float 6s ease-in-out infinite' }
+  } }
+}
+</script>
+<style>
+  .bg-brand-gradient{background-image:linear-gradient(120deg,#7C3AED 0%,#C026D3 55%,#F59E0B 100%)}
+  .text-gradient{background-image:linear-gradient(120deg,#7C3AED 0%,#C026D3 55%,#D97706 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .dark .text-gradient{background-image:linear-gradient(120deg,#A78BFA 0%,#E879F9 55%,#FBBF24 100%)}
+  .mesh{background:radial-gradient(60% 50% at 15% 0%,rgba(124,58,237,.20),transparent 60%),radial-gradient(40% 45% at 90% 10%,rgba(217,70,239,.16),transparent 60%),radial-gradient(45% 40% at 60% 100%,rgba(245,158,11,.12),transparent 60%)}
+  .grid-bg{background-image:linear-gradient(rgba(124,58,237,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.07) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%)}
+  .tabular{font-variant-numeric:tabular-nums}
+  .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{scrollbar-width:none}
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body class="bg-[#FBFBFE] text-ink dark:bg-night dark:text-slate-100 font-sans antialiased selection:bg-brand-600 selection:text-white">
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:bg-brand-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg">Skip to content</a>
+
+<!-- Header -->
+<header class="sticky top-0 z-50 border-b border-white/40 dark:border-white/10 bg-white/70 dark:bg-night/60 backdrop-blur-xl">
+  <div class="mx-auto max-w-7xl px-4 h-16 flex items-center gap-4">
+    <a href="landing.html" class="flex items-center gap-2 font-display font-extrabold text-lg tracking-tight" aria-label="PricePulse home">
+      <span class="grid place-items-center w-9 h-9 rounded-xl bg-brand-gradient shadow-glow">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>
+      </span>
+      Price<span class="text-gradient">Pulse</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-1 ml-6 text-sm font-medium text-ink-soft dark:text-slate-300" aria-label="Primary">
+      <a class="px-3 py-2 rounded-lg hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-white/5 dark:hover:text-white transition" href="#deals">Deals</a>
+      <a class="px-3 py-2 rounded-lg hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-white/5 dark:hover:text-white transition" href="#drops">Price drops</a>
+      <a class="px-3 py-2 rounded-lg hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-white/5 dark:hover:text-white transition" href="#how">How it works</a>
+      <a class="px-3 py-2 rounded-lg hover:bg-brand-50 hover:text-brand-700 dark:hover:bg-white/5 dark:hover:text-white transition" href="#extension">Extension</a>
+    </nav>
+    <div class="ml-auto flex items-center gap-2">
+      <button id="themeToggle" type="button" class="w-11 h-11 grid place-items-center rounded-xl border border-slate-200 dark:border-night-border hover:bg-brand-50 dark:hover:bg-white/5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 dark:focus-visible:ring-brand-400" aria-label="Toggle dark mode" aria-pressed="false">
+        <svg class="w-5 h-5 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="w-5 h-5 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a href="#alerts" class="hidden sm:inline-flex h-11 items-center px-4 rounded-xl text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 shadow-lift active:scale-[.98] transition">Sign in</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+<!-- HERO -->
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 mesh" aria-hidden="true"></div>
+  <div class="absolute inset-0 grid-bg" aria-hidden="true"></div>
+  <div class="relative mx-auto max-w-7xl px-4 pt-14 pb-16 md:pt-24 md:pb-24 text-center">
+    <p class="inline-flex items-center gap-2 rounded-full border border-brand-100 dark:border-white/10 bg-white/70 dark:bg-white/5 backdrop-blur px-3 py-1.5 text-xs font-semibold text-brand-700 dark:text-brand-400 animate-fade-up">
+      <span class="relative flex w-2 h-2"><span class="absolute inline-flex w-full h-full rounded-full bg-emerald-500 opacity-60 animate-ping"></span><span class="relative w-2 h-2 rounded-full bg-emerald-500"></span></span>
+      Tracking 4.2 crore prices across 5 stores · updated every 30 min
+    </p>
+    <h1 class="mt-6 font-display font-extrabold tracking-[-0.03em] text-[40px] leading-[1.05] sm:text-6xl md:text-7xl animate-fade-up" style="animation-delay:.06s">
+      Never overpay.<br class="hidden sm:block" /> <span class="text-gradient">Feel the price pulse.</span>
+    </h1>
+    <p class="mt-5 mx-auto max-w-2xl text-base md:text-lg text-ink-soft dark:text-slate-300 animate-fade-up" style="animation-delay:.12s">
+      One search compares the <strong class="text-ink dark:text-white">same product &amp; variant</strong> across Amazon, Flipkart, Myntra, Ajio and Croma — with full price history and alerts when it drops.
+    </p>
+
+    <!-- Omni search -->
+    <form id="omni" class="mt-9 mx-auto max-w-3xl animate-fade-up" style="animation-delay:.18s" role="search" onsubmit="event.preventDefault();location.href='product.html'">
+      <div class="group relative rounded-[28px] p-[1.5px] bg-brand-gradient shadow-glow">
+        <div class="rounded-[26px] bg-white/90 dark:bg-night-card/90 backdrop-blur-xl p-2 sm:p-2.5">
+          <div class="flex items-center gap-2">
+            <label for="q" class="sr-only">Paste a product link or search by name</label>
+            <span id="modeIcon" class="hidden sm:grid place-items-center w-11 h-11 rounded-2xl bg-brand-50 dark:bg-white/5 text-brand-700 dark:text-brand-400" aria-hidden="true">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </span>
+            <input id="q" name="q" autocomplete="off" class="flex-1 min-w-0 h-12 sm:h-14 bg-transparent px-3 text-base sm:text-lg placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:outline-none" placeholder="Paste an Amazon / Flipkart link or try “iPhone 15 128GB”" />
+            <kbd class="hidden md:inline-flex items-center gap-1 rounded-md border border-slate-200 dark:border-night-border px-2 py-1 text-xs text-ink-soft dark:text-slate-400">⌘K</kbd>
+            <button class="h-12 sm:h-14 px-5 sm:px-7 rounded-2xl bg-ink dark:bg-white text-white dark:text-ink font-semibold text-sm sm:text-base hover:-translate-y-0.5 hover:shadow-lift active:scale-[.98] transition ease-spring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Compare</button>
+          </div>
+          <div id="modeHint" class="px-3 pt-2 pb-1 text-left text-xs text-ink-soft dark:text-slate-400" aria-live="polite">Tip: paste any product URL — we'll find the exact same variant on other stores.</div>
+        </div>
+      </div>
+
+      <fieldset class="mt-5">
+        <legend class="sr-only">Stores to compare</legend>
+        <div class="flex flex-wrap justify-center gap-2" id="storeChips">
+          <!-- chips injected -->
+        </div>
+      </fieldset>
+    </form>
+
+    <div class="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-ink-soft dark:text-slate-400 animate-fade-up" style="animation-delay:.3s">
+      <span class="inline-flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Free forever</span>
+      <span class="inline-flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Variant-accurate matching</span>
+      <span class="inline-flex items-center gap-1.5"><svg class="w-4 h-4 text-emerald-700 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Alerts on Email, Telegram &amp; WhatsApp</span>
+    </div>
+
+    <!-- Hero preview card -->
+    <div class="relative mt-14 mx-auto max-w-5xl grid md:grid-cols-5 gap-4 text-left animate-fade-up" style="animation-delay:.36s">
+      <div class="md:col-span-3 rounded-3xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-white/[.04] backdrop-blur-xl shadow-soft p-5">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-night-muted dark:to-night-border grid place-items-center" aria-hidden="true">
+              <svg viewBox="0 0 40 40" class="w-9 h-9"><rect x="11" y="3" width="18" height="34" rx="4" fill="#1F2937"/><rect x="13" y="6" width="14" height="27" rx="2" fill="url(#hg)"/><defs><linearGradient id="hg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#A78BFA"/><stop offset="1" stop-color="#F472B6"/></linearGradient></defs></svg>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-brand-700 dark:text-brand-400">Apple · 128 GB · Black</p>
+              <p class="font-display font-bold">iPhone 15</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold px-2.5 py-1">▼ Lowest in 90 days</span>
+        </div>
+        <svg viewBox="0 0 400 120" class="mt-4 w-full h-28" role="img" aria-label="Price trend falling from ₹79,900 to ₹61,999 over 6 months">
+          <defs><linearGradient id="hf" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#7C3AED" stop-opacity=".35"/><stop offset="1" stop-color="#7C3AED" stop-opacity="0"/></linearGradient>
+          <linearGradient id="hs" x1="0" x2="1"><stop stop-color="#7C3AED"/><stop offset=".6" stop-color="#C026D3"/><stop offset="1" stop-color="#F59E0B"/></linearGradient></defs>
+          <path d="M0,20 L40,22 L80,18 L120,30 L160,28 L200,52 L240,48 L280,70 L320,64 L360,88 L400,96 L400,120 L0,120Z" fill="url(#hf)"/>
+          <path class="draw" d="M0,20 L40,22 L80,18 L120,30 L160,28 L200,52 L240,48 L280,70 L320,64 L360,88 L400,96" fill="none" stroke="url(#hs)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="400" cy="96" r="5" fill="#F59E0B" stroke="#fff" stroke-width="2"/>
+        </svg>
+        <div class="mt-2 flex items-end justify-between">
+          <div><p class="text-xs text-ink-soft dark:text-slate-400">Best price now</p><p class="font-display text-3xl font-extrabold tabular">₹61,999</p></div>
+          <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Save ₹3,901 vs next best</p>
+        </div>
+      </div>
+      <div class="md:col-span-2 rounded-3xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-white/[.04] backdrop-blur-xl shadow-soft p-5">
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-soft dark:text-slate-400">Same variant, 5 stores</p>
+        <ul class="mt-3 space-y-2.5 text-sm" id="heroStores"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Store marquee -->
+<section aria-label="Supported stores" class="border-y border-slate-200/70 dark:border-night-border bg-white/60 dark:bg-night-card/40 py-5 overflow-hidden">
+  <div class="flex w-max animate-marquee gap-12 text-ink-soft dark:text-slate-400 font-display font-bold text-lg" aria-hidden="true" id="marquee"></div>
+  <p class="sr-only">Supported stores: Amazon.in, Flipkart, Myntra, Ajio, Croma, Tata CLiQ, Reliance Digital, Nykaa.</p>
+</section>
+
+<!-- Trending price drops -->
+<section id="drops" class="mx-auto max-w-7xl px-4 py-16 md:py-20">
+  <div class="flex items-end justify-between gap-4">
+    <div>
+      <p class="text-sm font-semibold text-brand-700 dark:text-brand-400">Live · last 24 hours</p>
+      <h2 class="mt-1 font-display text-2xl md:text-3xl font-extrabold tracking-tight">Trending price drops</h2>
+    </div>
+    <div class="flex gap-2">
+      <button type="button" class="dropNav w-11 h-11 rounded-xl border border-slate-200 dark:border-night-border grid place-items-center hover:bg-brand-50 dark:hover:bg-white/5 transition" data-dir="-1" aria-label="Scroll left">←</button>
+      <button type="button" class="dropNav w-11 h-11 rounded-xl border border-slate-200 dark:border-night-border grid place-items-center hover:bg-brand-50 dark:hover:bg-white/5 transition" data-dir="1" aria-label="Scroll right">→</button>
+    </div>
+  </div>
+  <div id="dropRail" class="mt-6 flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-2 scroll-smooth"></div>
+</section>
+
+<!-- Deals grid -->
+<section id="deals" class="bg-white dark:bg-night-card/50 border-y border-slate-200/70 dark:border-night-border">
+  <div class="mx-auto max-w-7xl px-4 py-16 md:py-20">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div>
+        <p class="text-sm font-semibold text-brand-700 dark:text-brand-400">Verified by price history — no fake MRP discounts</p>
+        <h2 class="mt-1 font-display text-2xl md:text-3xl font-extrabold tracking-tight">Today's genuine deals</h2>
+      </div>
+      <div class="flex gap-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Deal categories" id="catTabs"></div>
+    </div>
+    <div id="dealGrid" class="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5"></div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how" class="mx-auto max-w-7xl px-4 py-16 md:py-24">
+  <div class="text-center max-w-2xl mx-auto">
+    <p class="text-sm font-semibold text-brand-700 dark:text-brand-400">How it works</p>
+    <h2 class="mt-1 font-display text-3xl md:text-4xl font-extrabold tracking-tight">Smarter than a price tracker</h2>
+    <p class="mt-3 text-ink-soft dark:text-slate-300">We match the exact SKU across stores, so a 128 GB Black is never compared with a 256 GB Blue.</p>
+  </div>
+  <ol class="mt-12 grid md:grid-cols-3 gap-5">
+    <li class="group relative rounded-3xl border border-slate-200 dark:border-night-border bg-white dark:bg-night-card p-6 shadow-soft hover:-translate-y-1 hover:shadow-lift transition duration-300">
+      <span class="font-display text-5xl font-extrabold text-gradient">01</span>
+      <h3 class="mt-3 font-display text-lg font-bold">Paste or search</h3>
+      <p class="mt-1.5 text-sm text-ink-soft dark:text-slate-300">Drop any Amazon, Flipkart, Myntra, Ajio or Croma link — or just type the product name.</p>
+    </li>
+    <li class="group relative rounded-3xl border border-slate-200 dark:border-night-border bg-white dark:bg-night-card p-6 shadow-soft hover:-translate-y-1 hover:shadow-lift transition duration-300">
+      <span class="font-display text-5xl font-extrabold text-gradient">02</span>
+      <h3 class="mt-3 font-display text-lg font-bold">Compare the real payable price</h3>
+      <p class="mt-1.5 text-sm text-ink-soft dark:text-slate-300">Shipping, seller and warranty included. Bank and coupon offers are shown separately so you know what's guaranteed.</p>
+    </li>
+    <li class="group relative rounded-3xl border border-slate-200 dark:border-night-border bg-white dark:bg-night-card p-6 shadow-soft hover:-translate-y-1 hover:shadow-lift transition duration-300">
+      <span class="font-display text-5xl font-extrabold text-gradient">03</span>
+      <h3 class="mt-3 font-display text-lg font-bold">Buy now — or set an alert</h3>
+      <p class="mt-1.5 text-sm text-ink-soft dark:text-slate-300">See whether today's price is low versus its history and get pinged on Telegram or WhatsApp when it hits your target.</p>
+    </li>
+  </ol>
+
+  <div id="extension" class="mt-10 grid sm:grid-cols-3 gap-4 text-center">
+    <div class="rounded-2xl bg-brand-50 dark:bg-white/[.04] p-5"><p class="font-display text-3xl font-extrabold tabular">4.2 Cr+</p><p class="text-sm text-ink-soft dark:text-slate-300">price points tracked</p></div>
+    <div class="rounded-2xl bg-brand-50 dark:bg-white/[.04] p-5"><p class="font-display text-3xl font-extrabold tabular">₹38 Cr</p><p class="text-sm text-ink-soft dark:text-slate-300">saved by shoppers this year</p></div>
+    <div class="rounded-2xl bg-brand-50 dark:bg-white/[.04] p-5"><p class="font-display text-3xl font-extrabold tabular">30 min</p><p class="text-sm text-ink-soft dark:text-slate-300">refresh on popular products</p></div>
+  </div>
+</section>
+
+<!-- Alert CTA -->
+<section id="alerts" class="mx-auto max-w-7xl px-4 pb-20">
+  <div class="relative overflow-hidden rounded-[32px] bg-brand-gradient p-[1.5px] shadow-glow">
+    <div class="relative rounded-[30px] bg-[#140B2E] text-white px-6 py-10 md:px-14 md:py-14 overflow-hidden">
+      <div class="absolute -right-24 -top-24 w-80 h-80 rounded-full bg-fuchsia-500/30 blur-3xl" aria-hidden="true"></div>
+      <div class="absolute -left-20 -bottom-24 w-72 h-72 rounded-full bg-brand-600/40 blur-3xl" aria-hidden="true"></div>
+      <div class="relative grid md:grid-cols-2 gap-8 items-center">
+        <div>
+          <h2 class="font-display text-3xl md:text-4xl font-extrabold tracking-tight">Set it. Forget it. <span class="text-amber-300">Save.</span></h2>
+          <p class="mt-3 text-slate-200 max-w-md">Tell us your target price. We'll watch every store and message you the moment any of them drops below it.</p>
+          <div class="mt-5 flex flex-wrap gap-2 text-sm">
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5">✉️ Email</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5">✈️ Telegram</span>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/15 px-3 py-1.5">💬 WhatsApp</span>
+          </div>
+        </div>
+        <form class="rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xl p-4 sm:p-5" onsubmit="event.preventDefault();this.querySelector('[data-ok]').classList.remove('hidden')">
+          <label for="alertUrl" class="text-sm font-semibold">Product link</label>
+          <input id="alertUrl" class="mt-1.5 w-full h-12 rounded-xl bg-white/95 text-ink px-4 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="https://www.flipkart.com/…" />
+          <div class="mt-3 grid grid-cols-[1fr_auto] gap-2">
+            <div>
+              <label for="alertPrice" class="text-sm font-semibold">Alert me below</label>
+              <div class="mt-1.5 relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-soft">₹</span><input id="alertPrice" inputmode="numeric" class="w-full h-12 rounded-xl bg-white/95 text-ink pl-8 pr-4 tabular focus:outline-none focus:ring-2 focus:ring-amber-300" value="59,999" /></div>
+            </div>
+            <button class="self-end h-12 px-6 rounded-xl bg-amber-400 text-ink font-bold hover:bg-amber-300 active:scale-[.98] transition">Create alert</button>
+          </div>
+          <p data-ok class="hidden mt-3 text-sm text-emerald-300" role="status">✓ Alert created — we'll ping you when it drops.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="border-t border-slate-200 dark:border-night-border bg-white dark:bg-night-card/40">
+  <div class="mx-auto max-w-7xl px-4 py-12 grid gap-10 md:grid-cols-5">
+    <div class="md:col-span-2">
+      <a href="landing.html" class="flex items-center gap-2 font-display font-extrabold text-lg"><span class="grid place-items-center w-8 h-8 rounded-lg bg-brand-gradient"><svg viewBox="0 0 24 24" class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span>PricePulse</a>
+      <p class="mt-3 text-sm text-ink-soft dark:text-slate-400 max-w-sm">India's cross-store price history &amp; comparison engine. Made in Bengaluru 🇮🇳</p>
+    </div>
+    <nav aria-label="Product"><h3 class="font-semibold text-sm">Product</h3><ul class="mt-3 space-y-2 text-sm text-ink-soft dark:text-slate-400"><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Browser extension</a></li><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Telegram bot</a></li><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Sale calendar</a></li></ul></nav>
+    <nav aria-label="Company"><h3 class="font-semibold text-sm">Company</h3><ul class="mt-3 space-y-2 text-sm text-ink-soft dark:text-slate-400"><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">About</a></li><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Blog</a></li><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Contact</a></li></ul></nav>
+    <nav aria-label="Legal"><h3 class="font-semibold text-sm">Legal</h3><ul class="mt-3 space-y-2 text-sm text-ink-soft dark:text-slate-400"><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Privacy</a></li><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Terms</a></li><li><a class="hover:text-brand-700 dark:hover:text-brand-400" href="#">Grievance officer</a></li></ul></nav>
+  </div>
+  <div class="border-t border-slate-200 dark:border-night-border">
+    <div class="mx-auto max-w-7xl px-4 py-6 text-xs leading-relaxed text-ink-soft dark:text-slate-400">
+      <p><strong class="text-ink dark:text-slate-200">Affiliate disclosure:</strong> PricePulse is reader-supported. Some links to Amazon.in, Flipkart, Myntra, Ajio and Croma are affiliate links — we may earn a small commission at no extra cost to you. This never affects which store we rank as cheapest. Prices and availability are accurate as of the "last checked" time and may change; the retailer's price at checkout applies. Trademarks belong to their respective owners.</p>
+      <p class="mt-3">© 2026 PricePulse Technologies Pvt. Ltd.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+const inr = n => '₹' + n.toLocaleString('en-IN');
+const STORES = [
+  {id:'amazon', name:'Amazon.in', bg:'#232F3E', mark:'#FF9900', letter:'a'},
+  {id:'flipkart', name:'Flipkart', bg:'#2874F0', mark:'#FFE11B', letter:'F'},
+  {id:'myntra', name:'Myntra', bg:'#C81E5A', mark:'#FFFFFF', letter:'M'},
+  {id:'ajio', name:'Ajio', bg:'#2C4152', mark:'#FFFFFF', letter:'A'},
+  {id:'croma', name:'Croma', bg:'#0F7D7E', mark:'#FFFFFF', letter:'C'},
+];
+const logo = (s, size='w-6 h-6 text-xs') => `<span class="inline-grid place-items-center ${size} rounded-md font-display font-extrabold" style="background:${s.bg};color:${s.mark}" aria-hidden="true">${s.letter}</span>`;
+
+// Store chips (toggle)
+document.getElementById('storeChips').innerHTML = STORES.map(s => `
+  <label class="group cursor-pointer">
+    <input type="checkbox" class="peer sr-only" checked name="store" value="${s.id}">
+    <span class="inline-flex items-center gap-2 h-11 rounded-full border border-slate-200 dark:border-night-border bg-white/80 dark:bg-white/5 backdrop-blur px-3.5 pr-4 text-sm font-semibold text-ink-soft dark:text-slate-300 transition ease-spring duration-200 hover:-translate-y-0.5 peer-checked:border-brand-600 peer-checked:text-ink dark:peer-checked:text-white dark:peer-checked:border-brand-400 peer-checked:shadow-lift peer-focus-visible:ring-2 peer-focus-visible:ring-brand-600">
+      ${logo(s)} ${s.name}
+    </span>
+  </label>`).join('');
+
+// Hero store list
+const heroRows = [
+  {s:STORES[1], p:61999, note:'Free delivery'},
+  {s:STORES[0], p:65900, note:'Sold by Appario'},
+  {s:STORES[4], p:66490, note:'+ ₹0 shipping'},
+  {s:STORES[3], p:null, note:'Not listed'},
+  {s:STORES[2], p:null, note:'Not listed'},
+];
+document.getElementById('heroStores').innerHTML = heroRows.map((r,i)=>`
+  <li class="flex items-center gap-3 rounded-xl px-3 py-2.5 ${i===0?'bg-emerald-50 dark:bg-emerald-400/10 ring-1 ring-emerald-600/30':'bg-slate-50 dark:bg-white/[.03]'}">
+    ${logo(r.s,'w-7 h-7 text-sm')}
+    <span class="flex-1 min-w-0"><span class="block font-semibold">${r.s.name}</span><span class="block text-xs text-ink-soft dark:text-slate-400">${r.note}</span></span>
+    <span class="tabular font-bold ${r.p? (i===0?'text-emerald-700 dark:text-emerald-300':'') : 'text-ink-soft dark:text-slate-500 font-medium'}">${r.p?inr(r.p):'—'}</span>
+  </li>`).join('');
+
+// Marquee
+const mq = ['Amazon.in','Flipkart','Myntra','Ajio','Croma','Tata CLiQ','Reliance Digital','Nykaa'];
+document.getElementById('marquee').innerHTML = [...mq,...mq].map(n=>`<span class="whitespace-nowrap">${n}</span><span aria-hidden="true" class="text-brand-400">✦</span>`).join('');
+
+// Product illustrations (inline SVG — no external images)
+const art = {
+  phone:(c1,c2)=>`<svg viewBox="0 0 120 120" class="w-full h-full"><rect x="38" y="12" width="44" height="96" rx="10" fill="#111827"/><rect x="42" y="18" width="36" height="84" rx="6" fill="url(#g${c1.slice(1)})"/><circle cx="60" cy="22" r="2" fill="#374151"/><defs><linearGradient id="g${c1.slice(1)}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs></svg>`,
+  laptop:(c1,c2)=>`<svg viewBox="0 0 120 120" class="w-full h-full"><rect x="22" y="30" width="76" height="50" rx="5" fill="#1F2937"/><rect x="26" y="34" width="68" height="42" rx="2" fill="${c1}"/><path d="M14 84h92l-6 8H20z" fill="#9CA3AF"/><circle cx="60" cy="55" r="9" fill="${c2}" opacity=".7"/></svg>`,
+  shoe:(c1,c2)=>`<svg viewBox="0 0 120 120" class="w-full h-full"><path d="M18 74c10-2 18-14 26-24 6 6 16 10 26 10 10 8 24 10 34 12 4 1 6 4 6 8v6H18z" fill="${c1}"/><path d="M18 86h92v8H18z" fill="${c2}"/><path d="M50 56l6 6M58 54l6 6M66 56l4 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`,
+  headphone:(c1,c2)=>`<svg viewBox="0 0 120 120" class="w-full h-full"><path d="M26 70V60a34 34 0 0 1 68 0v10" fill="none" stroke="${c1}" stroke-width="8" stroke-linecap="round"/><rect x="18" y="64" width="20" height="34" rx="9" fill="${c1}"/><rect x="82" y="64" width="20" height="34" rx="9" fill="${c1}"/><rect x="23" y="70" width="10" height="22" rx="5" fill="${c2}"/><rect x="87" y="70" width="10" height="22" rx="5" fill="${c2}"/></svg>`,
+  watch:(c1,c2)=>`<svg viewBox="0 0 120 120" class="w-full h-full"><rect x="46" y="10" width="28" height="100" rx="8" fill="${c2}"/><rect x="34" y="34" width="52" height="52" rx="14" fill="#111827"/><rect x="39" y="39" width="42" height="42" rx="10" fill="${c1}"/><path d="M60 50v12l7 5" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>`,
+  tv:(c1,c2)=>`<svg viewBox="0 0 120 120" class="w-full h-full"><rect x="12" y="26" width="96" height="58" rx="4" fill="#111827"/><rect x="16" y="30" width="88" height="50" rx="2" fill="url(#tv${c1.slice(1)})"/><path d="M44 96h32M60 84v12" stroke="#6B7280" stroke-width="4" stroke-linecap="round"/><defs><linearGradient id="tv${c1.slice(1)}" x1="0" x2="1"><stop stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs></svg>`,
+  kurta:(c1,c2)=>`<svg viewBox="0 0 120 120" class="w-full h-full"><path d="M44 14h32l20 16-8 14-8-4v66H40V40l-8 4-8-14z" fill="${c1}"/><path d="M60 14v40" stroke="${c2}" stroke-width="3"/><circle cx="60" cy="26" r="2" fill="${c2}"/><circle cx="60" cy="36" r="2" fill="${c2}"/><circle cx="60" cy="46" r="2" fill="${c2}"/></svg>`,
+};
+
+const drops = [
+  {n:'Samsung Galaxy S24 FE (8/256 GB)', k:'phone', c:['#38BDF8','#6366F1'], now:39999, was:49999, store:1, low:true},
+  {n:'Sony WH-1000XM5 Wireless', k:'headphone', c:['#1F2937','#A78BFA'], now:24990, was:29990, store:0, low:true},
+  {n:'MacBook Air M3 13" 16/512', k:'laptop', c:['#C7D2FE','#7C3AED'], now:114990, was:134900, store:4},
+  {n:'Nike Air Max SC', k:'shoe', c:['#F43F5E','#111827'], now:4197, was:5995, store:2, low:true},
+  {n:'Noise ColorFit Pro 6 Max', k:'watch', c:['#F59E0B','#334155'], now:3999, was:5999, store:1},
+  {n:'LG 55" 4K OLED evo C4', k:'tv', c:['#F0ABFC','#2563EB'], now:124990, was:159990, store:0},
+  {n:'Biba Women Straight Kurta', k:'kurta', c:['#0EA5E9','#FDE68A'], now:899, was:1799, store:3},
+];
+document.getElementById('dropRail').innerHTML = drops.map((d,i)=>{
+  const pct = Math.round((1-d.now/d.was)*100), s = STORES[d.store];
+  return `<a href="product.html" class="snap-start shrink-0 w-[260px] group rounded-3xl border border-slate-200 dark:border-night-border bg-white dark:bg-night-card p-4 shadow-soft hover:-translate-y-1 hover:shadow-lift transition duration-300 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+    <div class="relative aspect-[4/3] rounded-2xl bg-gradient-to-br from-slate-50 to-brand-50 dark:from-night-muted dark:to-[#1a1430] grid place-items-center overflow-hidden">
+      <div class="w-28 h-28 group-hover:scale-110 transition duration-500 ease-out-expo">${art[d.k](...d.c)}</div>
+      <span class="absolute top-2.5 left-2.5 rounded-full bg-emerald-700 text-white text-xs font-bold px-2 py-1 tabular">▼ ${pct}%</span>
+      ${d.low?'<span class="absolute top-2.5 right-2.5 rounded-full bg-white/90 dark:bg-night/80 text-[11px] font-bold px-2 py-1 text-brand-700 dark:text-brand-400 backdrop-blur">All-time low</span>':''}
+    </div>
+    <p class="mt-3 text-sm font-semibold line-clamp-2 min-h-[2.5rem]">${d.n}</p>
+    <div class="mt-2 flex items-baseline gap-2"><span class="font-display text-xl font-extrabold tabular">${inr(d.now)}</span><span class="text-xs text-ink-soft dark:text-slate-400 line-through tabular">${inr(d.was)}</span></div>
+    <div class="mt-2 flex items-center justify-between text-xs text-ink-soft dark:text-slate-400"><span class="inline-flex items-center gap-1.5">${logo(s,'w-5 h-5 text-[10px]')} ${s.name}</span><span>${[12,25,40,8,55,18,33][i]} min ago</span></div>
+  </a>`}).join('');
+document.querySelectorAll('.dropNav').forEach(b=>b.addEventListener('click',()=>{document.getElementById('dropRail').scrollBy({left: +b.dataset.dir*280, behavior:'smooth'})}));
+
+// Deals grid with category tabs
+const cats = ['All','Mobiles','Electronics','Fashion','Home'];
+const deals = [
+  {n:'OnePlus 13R 12/256', k:'phone', c:['#94A3B8','#0F172A'], p:39999, mrp:44999, store:0, cat:'Mobiles', score:'Great'},
+  {n:'boAt Airdopes 141', k:'headphone', c:['#0EA5E9','#E0F2FE'], p:999, mrp:4490, store:1, cat:'Electronics', score:'Good'},
+  {n:'Puma Smash v2 Sneakers', k:'shoe', c:['#FFFFFF','#16A34A'], p:1679, mrp:3999, store:3, cat:'Fashion', score:'Great'},
+  {n:'Samsung 43" Crystal 4K', k:'tv', c:['#38BDF8','#1E3A8A'], p:27990, mrp:41900, store:4, cat:'Home', score:'Fair'},
+  {n:'HP Pavilion 14 i5 13th Gen', k:'laptop', c:['#BAE6FD','#0EA5E9'], p:62990, mrp:78000, store:1, cat:'Electronics', score:'Good'},
+  {n:'W for Woman Anarkali Kurta', k:'kurta', c:['#DB2777','#FDE68A'], p:1349, mrp:2699, store:2, cat:'Fashion', score:'Great'},
+  {n:'Redmi Note 14 Pro 8/128', k:'phone', c:['#A855F7','#F472B6'], p:23999, mrp:28999, store:1, cat:'Mobiles', score:'Fair'},
+  {n:'Fire-Boltt Phoenix Ultra', k:'watch', c:['#10B981','#1F2937'], p:1499, mrp:9999, store:0, cat:'Electronics', score:'Good'},
+];
+const scoreStyle = {Great:'bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300', Good:'bg-sky-50 text-sky-800 dark:bg-sky-400/10 dark:text-sky-300', Fair:'bg-amber-50 text-amber-800 dark:bg-amber-400/10 dark:text-amber-300'};
+function renderDeals(cat){
+  document.getElementById('dealGrid').innerHTML = deals.filter(d=>cat==='All'||d.cat===cat).map(d=>{const s=STORES[d.store];return `
+  <a href="product.html" class="group rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-night-border bg-[#FBFBFE] dark:bg-night-card p-3 sm:p-4 hover:-translate-y-1 hover:shadow-lift hover:border-brand-100 dark:hover:border-brand-400/30 transition duration-300 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 animate-fade-up">
+    <div class="aspect-square rounded-xl sm:rounded-2xl bg-white dark:bg-night-muted grid place-items-center"><div class="w-3/5 h-3/5 group-hover:-rotate-3 group-hover:scale-105 transition duration-500">${art[d.k](...d.c)}</div></div>
+    <div class="mt-3 flex items-center gap-1.5 text-xs text-ink-soft dark:text-slate-400">${logo(s,'w-5 h-5 text-[10px]')}<span class="truncate">Best on ${s.name}</span></div>
+    <p class="mt-1 text-sm font-semibold line-clamp-2 min-h-[2.5rem]">${d.n}</p>
+    <div class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1"><span class="font-display text-lg sm:text-xl font-extrabold tabular">${inr(d.p)}</span><span class="text-xs text-ink-soft dark:text-slate-400 line-through tabular">${inr(d.mrp)}</span></div>
+    <span class="mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold ${scoreStyle[d.score]}">${d.score} price</span>
+  </a>`}).join('');
+}
+document.getElementById('catTabs').innerHTML = cats.map((c,i)=>`<button role="tab" aria-selected="${i===0}" data-cat="${c}" class="catTab shrink-0 h-10 px-4 rounded-full text-sm font-semibold border transition border-slate-200 dark:border-night-border aria-selected:bg-ink aria-selected:text-white aria-selected:border-ink dark:aria-selected:bg-white dark:aria-selected:text-ink hover:border-brand-600">${c}</button>`).join('');
+document.querySelectorAll('.catTab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.catTab').forEach(x=>x.setAttribute('aria-selected','false'));b.setAttribute('aria-selected','true');renderDeals(b.dataset.cat)}));
+renderDeals('All');
+
+// Omni search: detect URL vs text
+const q = document.getElementById('q'), hint = document.getElementById('modeHint');
+q.addEventListener('input',()=>{
+  const v = q.value.trim(); const m = v.match(/(amazon|flipkart|myntra|ajio|croma)/i);
+  if (/^https?:\/\//i.test(v)) hint.innerHTML = m ? `<span class="text-emerald-700 dark:text-emerald-400 font-semibold">✓ ${m[1][0].toUpperCase()+m[1].slice(1)} link detected</span> — we'll match this exact variant on the other stores.` : 'Link detected — checking supported stores…';
+  else hint.textContent = v ? `Searching “${v}” across ${document.querySelectorAll('input[name=store]:checked').length} stores` : 'Tip: paste any product URL — we\'ll find the exact same variant on other stores.';
+});
+addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();q.focus()}});
+
+// Theme toggle
+const tt = document.getElementById('themeToggle');
+const syncPressed = ()=>tt.setAttribute('aria-pressed', document.documentElement.classList.contains('dark'));
+syncPressed();
+tt.addEventListener('click',()=>{const d=document.documentElement.classList.toggle('dark');try{localStorage.setItem('pp-theme',d?'dark':'light')}catch(e){};syncPressed()});
+
+// Chart draw animation
+document.querySelectorAll('path.draw').forEach(p=>{const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.getBoundingClientRect();p.style.transition='stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1) .4s';p.style.strokeDashoffset=0});
+</script>
+</body>
+</html>
