@@ -62,6 +62,7 @@ export const variants = pgTable(
     ramGb: integer("ram_gb"),
     colour: text("colour"),
     colourHex: text("colour_hex"),
+    gtin: text("gtin"),
     launchMrpPaise: integer("launch_mrp_paise"),
   },
   (t) => [index("variants_product_idx").on(t.productId)],
@@ -84,6 +85,23 @@ export const storeListings = pgTable(
     uniqueIndex("store_listings_store_external_idx").on(t.storeId, t.externalId),
     index("store_listings_variant_idx").on(t.variantId),
   ],
+);
+
+/** Low-confidence listing↔variant pairs awaiting human review (never auto-linked). */
+export const pendingMatches = pgTable(
+  "pending_matches",
+  {
+    id: serial("id").primaryKey(),
+    listingId: integer("listing_id").notNull().references(() => storeListings.id, { onDelete: "cascade" }),
+    candidateVariantId: integer("candidate_variant_id")
+      .notNull()
+      .references(() => variants.id, { onDelete: "cascade" }),
+    confidence: real("confidence").notNull(),
+    reasons: text("reasons").array().notNull().default(sql`ARRAY[]::text[]`),
+    status: text("status").notNull().default("pending"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("pending_matches_pair_idx").on(t.listingId, t.candidateVariantId)],
 );
 
 export const offers = pgTable(

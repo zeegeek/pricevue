@@ -27,6 +27,8 @@ const DEFAULT_VERSION = "3.2";
 const RESOURCES = [
   "itemInfo.title",
   "itemInfo.byLineInfo",
+  "itemInfo.externalIds",
+  "itemInfo.manufactureInfo",
   "images.primary.large",
   "offersV2.listings.price",
   "offersV2.listings.availability",
@@ -66,6 +68,8 @@ export interface CreatorsApiItem {
   itemInfo?: {
     title?: { displayValue?: string } | null;
     byLineInfo?: { brand?: { displayValue?: string } | null } | null;
+    externalIds?: { eans?: { displayValues?: string[] } | null } | null;
+    manufactureInfo?: { model?: { displayValue?: string } | null } | null;
   } | null;
   offersV2?: {
     listings?: Array<{
@@ -91,6 +95,8 @@ export interface AmazonItem {
   title: string;
   url: string;
   brand?: string;
+  gtin?: string;
+  mpn?: string;
   imageUrl?: string;
   pricePaise?: number;
   mrpPaise?: number;
@@ -118,6 +124,8 @@ export function mapCreatorsItem(
     title: item.itemInfo?.title?.displayValue ?? item.asin,
     url: withAmazonTag(item.asin, tag),
     brand: item.itemInfo?.byLineInfo?.brand?.displayValue,
+    gtin: item.itemInfo?.externalIds?.eans?.displayValues?.[0],
+    mpn: item.itemInfo?.manufactureInfo?.model?.displayValue,
     imageUrl: primary?.large?.url ?? primary?.medium?.url ?? primary?.small?.url ?? undefined,
     pricePaise,
     mrpPaise: mrpPaise && pricePaise && mrpPaise > pricePaise ? mrpPaise : undefined,
@@ -286,6 +294,8 @@ export class AmazonAdapter implements StoreAdapter {
       url: item.url,
       brand: item.brand,
       imageUrl: item.imageUrl,
+      gtin: item.gtin,
+      mpn: item.mpn,
     };
   }
 

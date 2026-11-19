@@ -1,6 +1,7 @@
 /**
  * Ingest one product URL (Amazon via the Creators API, Flipkart via the polite fetcher) and,
- * if the listing is tracked, write a price snapshot.
+ * attach it to a matching variant (or create one, queueing low-confidence matches for review)
+ * and write a price snapshot.
  * Usage: pnpm --filter @pricevue/worker ingest <amazon-or-flipkart-url> [--dry-run]
  */
 import {
@@ -9,7 +10,7 @@ import {
   flipkartConfigFromEnv,
   parseProductUrl,
 } from "@pricevue/core";
-import { findListingId, getDb, saveOfferSnapshot } from "@pricevue/db";
+import { findListingId, getDb, ingestListing, saveOfferSnapshot } from "@pricevue/db";
 
 const [url, ...flags] = process.argv.slice(2);
 const parsed = url ? parseProductUrl(url) : null;
@@ -43,12 +44,20 @@ console.log(JSON.stringify(offer, null, 2));
 
 if (!flags.includes("--dry-run")) {
   const db = await getDb();
-  const listingId = await findListingId(db, parsed.store, parsed.externalId);
-  if (listingId) {
-    await saveOfferSnapshot(db, listingId, offer);
-    console.log(`Saved snapshot for listing ${listingId}.`);
-  } else {
-    console.log(`Listing ${parsed.store}/${parsed.externalId} is not tracked; nothing saved.`);
+  let listingId = await findListingId(db, parsed.store, parsed.externalId);
+  if (!listingId) {
+    const details = await adapter.getListing(parsed.externalId, { url: parsed.canonicalUrl });
+    if (!details) {
+      console.error(`No listing details for ${parsed.canonicalUrl}; nothing saved.`);
+      process.exit(2);
+    }
+    const r = await ingestListing(db, details);
+    listingId = r.listingId;
+    const how = r.match ? ` (best match ${r.match.confidence}: ${r.match.reasons.join(", ")})` : "";
+    console.log(`Listing ${r.outcome} → variant ${r.variantId}${how}.`);
+    if (r.pendingVariantId) console.log(`Queued for review against variant ${r.pendingVariantId}.`);
   }
+  await saveOfferSnapshot(db, listingId, offer);
+  console.log(`Saved snapshot for listing ${listingId}.`);
 }
 process.exit(0);

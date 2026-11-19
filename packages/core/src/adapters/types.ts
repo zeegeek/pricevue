@@ -32,6 +32,10 @@ export interface ListingDetails {
   brand?: string;
   imageUrl?: string;
   attributes?: Record<string, string>;
+  /** EAN/UPC barcode, when the store exposes it. */
+  gtin?: string;
+  /** Manufacturer model/part number, e.g. "SM-S921B". */
+  mpn?: string;
 }
 
 export interface OfferSnapshot {

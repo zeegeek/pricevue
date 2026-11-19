@@ -36,6 +36,8 @@ export interface ScrapedFlipkartProduct {
   mrpPaise?: number;
   inStock: boolean;
   seller?: string;
+  gtin?: string;
+  mpn?: string;
 }
 
 interface JsonLdOffer {
@@ -50,6 +52,10 @@ interface JsonLdProduct {
   image?: string | string[];
   brand?: string | { name?: string };
   offers?: JsonLdOffer | JsonLdOffer[];
+  gtin13?: string | number;
+  gtin?: string | number;
+  mpn?: string;
+  model?: string;
 }
 
 function asProducts(node: unknown): JsonLdProduct[] {
@@ -141,6 +147,8 @@ export function parseFlipkartProductHtml(html: string): ScrapedFlipkartProduct |
       mrpPaise,
       inStock: !/OutOfStock|SoldOut/i.test(offer.availability ?? ""),
       seller: offer.seller?.name,
+      gtin: (product.gtin13 ?? product.gtin)?.toString(),
+      mpn: product.mpn ?? product.model,
     };
   }
 
@@ -194,6 +202,8 @@ export class FlipkartAdapter implements StoreAdapter {
       url: scraped.url,
       brand: scraped.product.brand,
       imageUrl: scraped.product.imageUrl,
+      gtin: scraped.product.gtin,
+      mpn: scraped.product.mpn,
     };
   }
 
