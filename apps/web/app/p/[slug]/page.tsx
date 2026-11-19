@@ -1,8 +1,9 @@
 import { bestPriceSeries, buyOrWait, formatINR, priceStats, rankOffers, STORES, type StoreId } from "@pricevue/core";
-import { getProductPage, getSimilarProducts } from "@pricevue/db";
+import { getProductPage, getSimilarProducts, getWatchlistItem } from "@pricevue/db";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
 import { AlertPanel } from "@/components/alert-panel";
 import { BuyMeter } from "@/components/buy-meter";
 import { ComparisonTable } from "@/components/comparison-table";
@@ -26,7 +27,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const database = await db();
   const page = await getProductPage(database, slug, v ? Number(v) : undefined);
   if (!page) notFound();
-  const similar = await getSimilarProducts(database, slug);
+  const [similar, session] = await Promise.all([getSimilarProducts(database, slug), auth()]);
+  const userId = session?.user?.id;
+  const tracked = userId ? await getWatchlistItem(database, userId, page.selected.id) : null;
 
   const now = Date.now();
   const best = rankOffers(page.offers)[0];
@@ -98,7 +101,17 @@ export default async function ProductPage({ params, searchParams }: Props) {
         </div>
         <aside className="space-y-6">
           {verdict && <BuyMeter result={verdict} />}
-          {best && stats && <AlertPanel currentPaise={best.payablePaise} lowestPaise={stats.lowest} />}
+          {best && stats && (
+            <AlertPanel
+              key={page.selected.id}
+              currentPaise={best.payablePaise}
+              lowestPaise={stats.lowest}
+              variantId={page.selected.id}
+              returnTo={`/p/${slug}?v=${page.selected.id}`}
+              tracked={!!tracked}
+              trackedTargetPaise={tracked?.targetPaise}
+            />
+          )}
         </aside>
       </div>
 

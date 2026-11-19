@@ -11,13 +11,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.11.3",
     "@electric-sql/pglite": "^0.5.17",
     "@pricevue/core": "workspace:*",
     "@pricevue/db": "workspace:*",
     "@pricevue/ui": "workspace:*",
+    "drizzle-orm": "^0.45.4",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.577.0",
     "next": "^15.5.4",
+    "next-auth": "5.0.0-beta.32",
     "next-themes": "^0.4.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

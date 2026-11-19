@@ -37,7 +37,7 @@ export function generateSeries(mrp: number, price: number, days: number, seed: n
 
 export async function seedDatabase(db: Db, now = new Date()): Promise<{ products: number; pricePoints: number }> {
   await db.execute(
-    sql`TRUNCATE deals, alerts, watchlists, users, price_points, offers, store_listings, variants, products, brands, categories, stores RESTART IDENTITY CASCADE`,
+    sql`TRUNCATE deals, alerts, watchlist_items, sessions, accounts, verification_tokens, users, price_points, offers, store_listings, variants, products, brands, categories, stores RESTART IDENTITY CASCADE`,
   );
   await db.insert(s.stores).values([
     { id: "amazon", name: "Amazon.in", domain: "amazon.in", isLive: true },

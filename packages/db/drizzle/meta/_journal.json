@@ -15,6 +15,13 @@
       "when": 1795105253180,
       "tag": "0001_product_matching",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795105864657,
+      "tag": "0002_auth_watchlist",
+      "breakpoints": true
     }
   ]
 }

@@ -3,15 +3,26 @@
 import { formatINR, parseINRInput } from "@pricevue/core";
 import { cn } from "@pricevue/ui";
 import { Bell, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { trackPrice } from "@/app/watchlist/actions";
 
 const CHANNELS = ["Email", "Telegram", "WhatsApp"] as const;
 
-export function AlertPanel({ currentPaise, lowestPaise }: { currentPaise: number; lowestPaise: number }) {
+interface Props {
+  currentPaise: number;
+  lowestPaise: number;
+  variantId: number;
+  returnTo: string;
+  trackedTargetPaise?: number | null;
+  tracked?: boolean;
+}
+
+export function AlertPanel({ currentPaise, lowestPaise, variantId, returnTo, trackedTargetPaise, tracked = false }: Props) {
   const suggested = Math.round((lowestPaise * 1.02) / 10000) * 10000;
-  const [target, setTarget] = useState(String(suggested / 100));
+  const [target, setTarget] = useState(String((trackedTargetPaise ?? suggested) / 100));
+  const [pending, startTransition] = useTransition();
   const [channels, setChannels] = useState<Record<string, boolean>>({ Email: true, Telegram: false, WhatsApp: false });
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(tracked);
   const parsed = parseINRInput(target);
 
   return (
@@ -20,13 +31,16 @@ export function AlertPanel({ currentPaise, lowestPaise }: { currentPaise: number
       className="rounded-2xl border border-border bg-card p-5 shadow-soft"
       onSubmit={(e) => {
         e.preventDefault();
-        setSaved(true);
+        startTransition(async () => {
+          await trackPrice(variantId, parsed, returnTo);
+          setSaved(true);
+        });
       }}
     >
       <h2 className="flex items-center gap-2 font-display font-bold">
-        <Bell className="size-4 text-brand-500" aria-hidden /> Set a price alert
+        <Bell className="size-4 text-brand-500" aria-hidden /> Track this price
       </h2>
-      <p className="mt-1 text-sm text-muted-foreground">We&apos;ll ping you when any store drops below your target.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Add it to your watchlist and we&apos;ll ping you when any store drops below your target.</p>
       <label htmlFor="target" className="mt-4 block text-xs font-semibold text-muted-foreground">Target price</label>
       <div className="mt-1 flex items-center rounded-xl border border-border bg-background px-3 focus-within:ring-2 focus-within:ring-brand-500">
         <span className="text-muted-foreground">₹</span>
@@ -64,12 +78,12 @@ export function AlertPanel({ currentPaise, lowestPaise }: { currentPaise: number
       </fieldset>
       <button
         type="submit"
-        disabled={!parsed}
+        disabled={!parsed || pending}
         className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand-gradient font-semibold text-white shadow-glow transition hover:brightness-110 disabled:opacity-50"
       >
-        {saved ? (<><Check className="size-4" aria-hidden /> Alert saved (demo)</>) : "Create alert"}
+        {saved ? (<><Check className="size-4" aria-hidden /> On your watchlist</>) : pending ? "Saving…" : "Track price"}
       </button>
-      <p className="sr-only" aria-live="polite">{saved ? "Alert saved" : ""}</p>
+      <p className="sr-only" aria-live="polite">{saved ? "Added to watchlist" : ""}</p>
     </form>
   );
 }

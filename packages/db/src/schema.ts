@@ -6,6 +6,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   real,
   serial,
   text,
@@ -140,18 +141,56 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
   name: text("name"),
+  emailVerified: timestamp("email_verified", { withTimezone: true, mode: "date" }),
+  image: text("image"),
   createdAt: ts("created_at").notNull().defaultNow(),
 });
 
-export const watchlists = pgTable(
-  "watchlists",
+// Auth.js (NextAuth v5) adapter tables.
+export const accounts = pgTable(
+  "accounts",
+  {
+    userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").$type<"oauth" | "oidc" | "email" | "webauthn">().notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("provider_account_id").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (t) => [primaryKey({ columns: [t.provider, t.providerAccountId] })],
+);
+
+export const sessions = pgTable("sessions", {
+  sessionToken: text("session_token").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { withTimezone: true, mode: "date" }).notNull(),
+});
+
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { withTimezone: true, mode: "date" }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
+);
+
+export const watchlistItems = pgTable(
+  "watchlist_items",
   {
     id: serial("id").primaryKey(),
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     variantId: integer("variant_id").notNull().references(() => variants.id, { onDelete: "cascade" }),
+    targetPaise: integer("target_paise"),
     createdAt: ts("created_at").notNull().defaultNow(),
   },
-  (t) => [uniqueIndex("watchlists_user_variant_idx").on(t.userId, t.variantId)],
+  (t) => [uniqueIndex("watchlist_items_user_variant_idx").on(t.userId, t.variantId)],
 );
 
 export const alerts = pgTable("alerts", {
