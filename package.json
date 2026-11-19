@@ -14,9 +14,9 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:generate": "pnpm --filter @pricevue/db db:generate",
-    "db:migrate": "pnpm --filter @pricevue/db db:migrate",
-    "db:seed": "pnpm --filter @pricevue/db db:seed",
+    "db:generate": "pnpm --filter @pricevue/db generate",
+    "db:migrate": "pnpm --filter @pricevue/db migrate",
+    "db:seed": "pnpm --filter @pricevue/db seed",
     "db:setup": "pnpm db:migrate && pnpm db:seed"
   },
   "devDependencies": {
