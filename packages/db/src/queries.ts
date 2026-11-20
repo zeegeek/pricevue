@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, ilike, inArray, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import type { OfferSnapshot, StoreId } from "@pricevue/core";
 import type { Db } from "./client";
 import { brands, deals, offers, pricePoints, products, storeListings, variants } from "./schema";
@@ -45,6 +45,7 @@ export async function getDeals(db: Db, limit = 8): Promise<ProductCard[]> {
     .innerJoin(variants, eq(variants.id, storeListings.variantId))
     .innerJoin(products, eq(products.id, variants.productId))
     .innerJoin(brands, eq(brands.id, products.brandId))
+    .where(isNull(deals.expiredAt))
     .orderBy(desc(deals.dropPct));
   const seen = new Set<string>();
   const out: ProductCard[] = [];

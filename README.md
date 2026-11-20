@@ -36,11 +36,13 @@ pnpm db:setup
 | `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm build` | Run across all workspaces via Turborepo |
 | `pnpm db:generate` | Generate SQL migrations from `packages/db/src/schema.ts` |
 | `pnpm db:migrate` / `pnpm db:seed` | Apply migrations / reseed demo data |
-| `pnpm --filter @pricevue/worker start` | Start the offer-refresh worker and 15-min price-alert email check (needs Redis) |
+| `pnpm --filter @pricevue/worker start` | Start the offer-refresh worker (re-detects deals after each snapshot) and 15-min deal sweep + price-alert email check (needs Redis) |
 
 ## Data model
 
 `product → variant → store_listing → offer (current) → price_points`, plus `users`, `watchlists`, `alerts` and `deals`. All money is stored as integer **paise**.
+
+**Deals** (`/deals`) are computed from each listing's own history (`packages/core/src/deals.ts`): the current price must be ≥ 3% below the lower of its 30- and 90-day medians, with at least 14 days of history. MRP is never used, so fake "off MRP" discounts don't qualify. Record lows (90-day / all-time) boost the score. Deals are upserted per listing and expired when the price recovers, the item goes out of stock or the offer goes stale.
 
 ## Stores and affiliates
 

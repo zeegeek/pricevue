@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { rupeesToPaise } from "@pricevue/core";
 import type { Db } from "../client";
+import { runDealDetection } from "../deals";
 import * as s from "../schema";
 import { SALE_WINDOWS, SEED_BRANDS, SEED_PRODUCTS } from "./data";
 
@@ -124,22 +125,10 @@ export async function seedDatabase(db: Db, now = new Date()): Promise<{ products
           couponOffer: seed % 4 === 0 ? "Extra ₹500 coupon" : null,
           capturedAt: lastCheckedAt,
         });
-
-        const ref = series[Math.max(0, series.length - 31)]!;
-        const dropPct = ((ref - current) / ref) * 100;
-        if (dropPct >= 2) {
-          await db.insert(s.deals).values({
-            listingId: listing!.id,
-            pricePaise: rupeesToPaise(current),
-            referencePaise: rupeesToPaise(ref),
-            dropPct: Math.round(dropPct * 10) / 10,
-            score: dropPct >= 8 ? "great" : dropPct >= 4 ? "good" : "fair",
-            detectedAt: new Date(now.getTime() - (seed % 12) * 3_600_000),
-          });
-        }
       }
     }
   }
+  await runDealDetection(db, { now });
   await db.insert(s.users).values({ email: "demo@pricevue.in", name: "Demo User" });
   return { products: SEED_PRODUCTS.length, pricePoints: pointCount };
 }

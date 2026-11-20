@@ -234,7 +234,17 @@ export const deals = pgTable(
     referencePaise: integer("reference_paise").notNull(),
     dropPct: real("drop_pct").notNull(),
     score: dealScoreEnum("score").notNull(),
+    /** Ranking value (drop % plus record-low bonuses). */
+    points: real("points").notNull().default(0),
+    isLowestEver: boolean("is_lowest_ever").notNull().default(false),
+    isLow90: boolean("is_low_90").notNull().default(false),
     detectedAt: ts("detected_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+    /** Set when the price recovers; expired deals are hidden but kept for history. */
+    expiredAt: ts("expired_at"),
   },
-  (t) => [index("deals_detected_idx").on(t.detectedAt)],
+  (t) => [
+    index("deals_detected_idx").on(t.detectedAt),
+    uniqueIndex("deals_listing_idx").on(t.listingId),
+  ],
 );

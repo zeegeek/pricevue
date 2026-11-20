@@ -91,7 +91,7 @@ export default async function Home() {
             <h2 id="deals-h" className="font-display text-3xl font-extrabold tracking-tight">Today&apos;s best drops</h2>
             <p className="mt-1 text-muted-foreground">Biggest falls versus last month&apos;s price.</p>
           </div>
-          <Link href="/search?q=" className="text-sm font-semibold text-brand-700 hover:underline dark:text-brand-400">
+          <Link href="/deals" className="text-sm font-semibold text-brand-700 hover:underline dark:text-brand-400">
             View all →
           </Link>
         </div>

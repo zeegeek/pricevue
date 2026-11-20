@@ -8,7 +8,7 @@ import { StoreMark } from "./store-badge";
 
 const scoreTone = { great: "success", good: "brand", fair: "neutral" } as const;
 
-export function ProductCard({ card }: { card: Card }) {
+export function ProductCard({ card, note }: { card: Card; note?: string }) {
   return (
     <Link
       href={`/p/${card.slug}?v=${card.variantId}`}
@@ -29,6 +29,7 @@ export function ProductCard({ card }: { card: Card }) {
       <p className="text-xs font-medium text-muted-foreground">{card.brand}</p>
       <h3 className="line-clamp-1 font-display font-bold">{card.title}</h3>
       <p className="line-clamp-1 text-xs text-muted-foreground">{card.variantLabel}</p>
+      {note && <p className="mt-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">{note}</p>}
       <div className="mt-3 flex items-end justify-between gap-2">
         <div>
           <p className="tabular font-display text-xl font-extrabold">{formatINR(card.pricePaise)}</p>
