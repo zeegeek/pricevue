@@ -36,7 +36,7 @@ pnpm db:setup
 | `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm build` | Run across all workspaces via Turborepo |
 | `pnpm db:generate` | Generate SQL migrations from `packages/db/src/schema.ts` |
 | `pnpm db:migrate` / `pnpm db:seed` | Apply migrations / reseed demo data |
-| `pnpm --filter @pricevue/worker start` | Start the offer-refresh worker (needs Redis) |
+| `pnpm --filter @pricevue/worker start` | Start the offer-refresh worker and 15-min price-alert email check (needs Redis) |
 
 ## Data model
 

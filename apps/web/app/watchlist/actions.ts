@@ -12,10 +12,10 @@ async function requireUserId(callbackUrl: string) {
   return id;
 }
 
-export async function trackPrice(variantId: number, targetPaise: number | null, returnTo: string) {
+export async function trackPrice(variantId: number, targetPaise: number | null, returnTo: string, emailAlerts = true) {
   const userId = await requireUserId(returnTo);
   const target = targetPaise && Number.isInteger(targetPaise) && targetPaise > 0 ? targetPaise : null;
-  await upsertWatchlistItem(await db(), userId, variantId, target);
+  await upsertWatchlistItem(await db(), userId, variantId, target, emailAlerts);
   revalidatePath("/watchlist");
 }
 

@@ -1,7 +1,7 @@
 import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
 import { AMAZON_OFFER_MAX_AGE_MS, createAdapterRegistry, type OfferSnapshot } from "@pricevue/core";
-import { getDb, saveOfferSnapshot, schema } from "@pricevue/db";
+import { alertSecret, createAlertSender, getDb, runPriceAlerts, saveOfferSnapshot, schema } from "@pricevue/db";
 import { processRefresh, REFRESH_QUEUE, type RefreshJob } from "./refresh";
 
 const connection = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
@@ -52,3 +52,25 @@ setInterval(() => void enqueue(amazonOnly), AMAZON_OFFER_MAX_AGE_MS);
 setInterval(() => void enqueue(others), OTHER_REFRESH_MS);
 const queued = (await enqueue(amazonOnly)) + (await enqueue(others));
 console.log(`Worker started; queued ${queued} listings.`);
+
+// Price-drop email alerts: checked periodically against the latest snapshots (one check at a time).
+const ALERT_CHECK_MS = 15 * 60 * 1000;
+const alertOptions = {
+  send: createAlertSender(process.env),
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  secret: alertSecret(process.env),
+};
+let alertsRunning = false;
+async function checkAlerts() {
+  if (alertsRunning) return;
+  alertsRunning = true;
+  try {
+    console.log("[alerts]", await runPriceAlerts(db, alertOptions));
+  } catch (err) {
+    console.error("[alerts] check failed", err);
+  } finally {
+    alertsRunning = false;
+  }
+}
+setInterval(() => void checkAlerts(), ALERT_CHECK_MS);
+void checkAlerts();

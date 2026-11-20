@@ -17,12 +17,18 @@ export interface WatchlistEntry {
   createdAt: Date;
 }
 
-/** Adds (or updates the target of) a tracked variant for a user. */
-export async function upsertWatchlistItem(db: Db, userId: string, variantId: number, targetPaise: number | null) {
+/** Adds (or updates the target and email-alert flag of) a tracked variant for a user. */
+export async function upsertWatchlistItem(
+  db: Db,
+  userId: string,
+  variantId: number,
+  targetPaise: number | null,
+  emailAlerts = true,
+) {
   const [row] = await db
     .insert(watchlistItems)
-    .values({ userId, variantId, targetPaise })
-    .onConflictDoUpdate({ target: [watchlistItems.userId, watchlistItems.variantId], set: { targetPaise } })
+    .values({ userId, variantId, targetPaise, emailAlerts })
+    .onConflictDoUpdate({ target: [watchlistItems.userId, watchlistItems.variantId], set: { targetPaise, emailAlerts } })
     .returning();
   return row!;
 }

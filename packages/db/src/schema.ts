@@ -188,9 +188,30 @@ export const watchlistItems = pgTable(
     userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
     variantId: integer("variant_id").notNull().references(() => variants.id, { onDelete: "cascade" }),
     targetPaise: integer("target_paise"),
+    emailAlerts: boolean("email_alerts").notNull().default(true),
+    /** Best price seen by the last alert check; baseline for drop detection. */
+    lastSeenPaise: integer("last_seen_paise"),
     createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [uniqueIndex("watchlist_items_user_variant_idx").on(t.userId, t.variantId)],
+);
+
+/** Price alerts actually sent, per watchlist item; drives dedupe and cooldown. */
+export const alertEvents = pgTable(
+  "alert_events",
+  {
+    id: serial("id").primaryKey(),
+    watchlistItemId: integer("watchlist_item_id")
+      .notNull()
+      .references(() => watchlistItems.id, { onDelete: "cascade" }),
+    channel: text("channel").notNull().default("email"),
+    reason: text("reason").$type<"target" | "drop">().notNull(),
+    listingId: integer("listing_id").references(() => storeListings.id, { onDelete: "set null" }),
+    pricePaise: integer("price_paise").notNull(),
+    previousPaise: integer("previous_paise"),
+    sentAt: ts("sent_at").notNull().defaultNow(),
+  },
+  (t) => [index("alert_events_item_sent_idx").on(t.watchlistItemId, t.sentAt)],
 );
 
 export const alerts = pgTable("alerts", {

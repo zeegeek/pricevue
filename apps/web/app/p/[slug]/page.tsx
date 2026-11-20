@@ -110,6 +110,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
               returnTo={`/p/${slug}?v=${page.selected.id}`}
               tracked={!!tracked}
               trackedTargetPaise={tracked?.targetPaise}
+              trackedEmailAlerts={tracked?.emailAlerts}
             />
           )}
         </aside>
