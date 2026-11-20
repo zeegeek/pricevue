@@ -64,6 +64,16 @@ async function bestCandidate(db: Db, attrs: ProductAttributes) {
   return { best, sameModelProductId };
 }
 
+/** Queues a pair for review; a pair that already exists (pending, approved or rejected) is never re-queued. */
+export async function queuePendingMatch(db: Pick<Db, "insert">, listingId: number, match: MatchResult & { variantId: number }) {
+  const rows = await db
+    .insert(pendingMatches)
+    .values({ listingId, candidateVariantId: match.variantId, confidence: match.confidence, reasons: match.reasons })
+    .onConflictDoNothing({ target: [pendingMatches.listingId, pendingMatches.candidateVariantId] })
+    .returning({ id: pendingMatches.id });
+  return rows.length > 0;
+}
+
 /**
  * Attaches a newly seen store listing to the variant it matches. High-confidence matches are
  * linked; otherwise a new product/variant is created and any plausible candidate is queued in
@@ -89,6 +99,7 @@ export async function ingestListing(db: Db, listing: ListingDetails): Promise<In
           externalId: listing.externalId,
           url: listing.url,
           title: listing.title,
+          imageUrl: listing.imageUrl,
           matchConfidence: confidence,
           matchMethod: method,
         })
@@ -147,12 +158,7 @@ export async function ingestListing(db: Db, listing: ListingDetails): Promise<In
     const listingId = await insertListing(variant!.id, 1, "new");
 
     if (best && best.confidence >= REVIEW_THRESHOLD) {
-      await tx.insert(pendingMatches).values({
-        listingId,
-        candidateVariantId: best.variantId,
-        confidence: best.confidence,
-        reasons: best.reasons,
-      });
+      await queuePendingMatch(tx, listingId, best);
       return { listingId, variantId: variant!.id, outcome: "created" as const, match: best, pendingVariantId: best.variantId };
     }
     return { listingId, variantId: variant!.id, outcome: "created" as const, match: best };

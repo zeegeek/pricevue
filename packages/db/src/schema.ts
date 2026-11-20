@@ -78,6 +78,7 @@ export const storeListings = pgTable(
     externalId: text("external_id").notNull(),
     url: text("url").notNull(),
     title: text("title").notNull(),
+    imageUrl: text("image_url"),
     matchConfidence: real("match_confidence").notNull().default(1),
     matchMethod: text("match_method").notNull().default("manual"),
     lastCheckedAt: ts("last_checked_at"),
@@ -99,7 +100,10 @@ export const pendingMatches = pgTable(
       .references(() => variants.id, { onDelete: "cascade" }),
     confidence: real("confidence").notNull(),
     reasons: text("reasons").array().notNull().default(sql`ARRAY[]::text[]`),
+    /** pending | approved | rejected. Resolved rows are kept so the same pair is never re-queued. */
     status: text("status").notNull().default("pending"),
+    resolvedBy: uuid("resolved_by").references(() => users.id, { onDelete: "set null" }),
+    resolvedAt: ts("resolved_at"),
     createdAt: ts("created_at").notNull().defaultNow(),
   },
   (t) => [uniqueIndex("pending_matches_pair_idx").on(t.listingId, t.candidateVariantId)],

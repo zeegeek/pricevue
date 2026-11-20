@@ -6,3 +6,4 @@ export { seedDatabase } from "./seed/seed";
 export * from "./watchlist";
 export * from "./alerts";
 export * from "./deals";
+export * from "./review";
