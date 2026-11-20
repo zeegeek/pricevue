@@ -262,3 +262,7 @@ export async function findListingId(db: Db, storeId: StoreId, externalId: string
     .where(and(eq(storeListings.storeId, storeId), eq(storeListings.externalId, externalId)));
   return row?.id ?? null;
 }
+
+export async function listProductSlugs(db: Db) {
+  return db.select({ slug: products.slug, createdAt: products.createdAt }).from(products);
+}

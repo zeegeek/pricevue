@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "./logo";
 
 export function Footer() {
@@ -21,9 +22,10 @@ export function Footer() {
         <div className="text-sm">
           <p className="font-semibold">PriceVue</p>
           <ul className="mt-3 space-y-2 text-muted-foreground">
-            <li>pricevue.in</li>
-            <li>Privacy</li>
-            <li>Terms</li>
+            <li><Link href="/deals" className="hover:text-foreground">Deals</Link></li>
+            <li><Link href="/privacy" className="hover:text-foreground">Privacy</Link></li>
+            <li><Link href="/terms" className="hover:text-foreground">Terms</Link></li>
+            <li><Link href="/disclosure" className="hover:text-foreground">Affiliate disclosure</Link></li>
           </ul>
         </div>
       </div>

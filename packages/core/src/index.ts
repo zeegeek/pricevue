@@ -9,3 +9,4 @@ export * from "./adapters";
 export * from "./http/polite-fetch";
 export * from "./alerts";
 export * from "./deals";
+export * from "./env";

@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/.turbo
+**/coverage
+.pglite
+.git
+.env
+.env.*
+!.env.example
+apps/web/*
+!apps/web/package.json
+docs

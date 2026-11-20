@@ -1,8 +1,12 @@
 import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
-import { AMAZON_OFFER_MAX_AGE_MS, createAdapterRegistry, type OfferSnapshot } from "@pricevue/core";
+import { AMAZON_OFFER_MAX_AGE_MS, assertProductionEnv, createAdapterRegistry, WORKER_REQUIRED_ENV, type OfferSnapshot } from "@pricevue/core";
 import { alertSecret, createAlertSender, getDb, runDealDetection, runPriceAlerts, saveOfferSnapshot, schema } from "@pricevue/db";
 import { processRefresh, REFRESH_QUEUE, type RefreshJob } from "./refresh";
+
+assertProductionEnv("worker", WORKER_REQUIRED_ENV);
+if (process.env.NODE_ENV === "production" && !process.env.ALERTS_SECRET && !process.env.AUTH_SECRET)
+  throw new Error("[worker] Set ALERTS_SECRET or AUTH_SECRET (same value as the web app) to sign unsubscribe links.");
 
 const connection = new Redis(process.env.REDIS_URL ?? "redis://localhost:6379", {
   maxRetriesPerRequest: null,

@@ -18,8 +18,12 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ v?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const page = await getProductPage(await db(), (await params).slug);
-  return { title: page ? `${page.product.title} price history & comparison` : "Product" };
+  const { slug } = await params;
+  const page = await getProductPage(await db(), slug);
+  if (!page) return { title: "Product" };
+  const title = `${page.product.title} price history & comparison`;
+  const description = `Price history and live prices for ${page.product.title} across Amazon.in and Flipkart.`;
+  return { title, description, alternates: { canonical: `/p/${slug}` }, openGraph: { title, description, url: `/p/${slug}` } };
 }
 
 export default async function ProductPage({ params, searchParams }: Props) {

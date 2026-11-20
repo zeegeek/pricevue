@@ -36,7 +36,12 @@ pnpm db:setup
 | `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm build` | Run across all workspaces via Turborepo |
 | `pnpm db:generate` | Generate SQL migrations from `packages/db/src/schema.ts` |
 | `pnpm db:migrate` / `pnpm db:seed` | Apply migrations / reseed demo data |
+| `pnpm db:migrate:prod` | Apply migrations to production Postgres (requires `DATABASE_URL`) |
 | `pnpm --filter @pricevue/worker start` | Start the offer-refresh worker (re-detects deals after each snapshot) and 15-min deal sweep + price-alert email check (needs Redis) |
+
+## Deploying
+
+See [docs/DEPLOY.md](docs/DEPLOY.md) for the step-by-step launch guide (Vercel, Neon, Upstash, Railway, Hostinger DNS).
 
 ## Data model
 

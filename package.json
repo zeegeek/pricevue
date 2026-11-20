@@ -16,6 +16,7 @@
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @pricevue/db generate",
     "db:migrate": "pnpm --filter @pricevue/db migrate",
+    "db:migrate:prod": "pnpm --filter @pricevue/db migrate:prod",
     "db:seed": "pnpm --filter @pricevue/db seed",
     "db:setup": "pnpm db:migrate && pnpm db:seed"
   },
